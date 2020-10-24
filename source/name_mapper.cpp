@@ -32,11 +32,7 @@ namespace {
 
 // Converts a uint32_t to its string decimal representation.
 std::string to_string(uint32_t id) {
-  // Use stringstream, since some versions of Android compilers lack
-  // std::to_string.
-  std::stringstream os;
-  os << id;
-  return os.str();
+  return std::to_string(id);
 }
 
 }  // anonymous namespace
