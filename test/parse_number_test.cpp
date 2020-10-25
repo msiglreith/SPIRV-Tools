@@ -31,81 +31,81 @@ using testing::NotNull;
 TEST(ParseNarrowSignedIntegers, Sample) {
   int16_t i16;
 
-  EXPECT_FALSE(ParseNumber(nullptr, &i16));
-  EXPECT_FALSE(ParseNumber("", &i16));
-  EXPECT_FALSE(ParseNumber("0=", &i16));
+  EXPECT_FALSE(ParseInteger(nullptr, &i16));
+  EXPECT_FALSE(ParseInteger("", &i16));
+  EXPECT_FALSE(ParseInteger("0=", &i16));
 
-  EXPECT_TRUE(ParseNumber("0", &i16));
+  EXPECT_TRUE(ParseInteger("0", &i16));
   EXPECT_EQ(0, i16);
-  EXPECT_TRUE(ParseNumber("32767", &i16));
+  EXPECT_TRUE(ParseInteger("32767", &i16));
   EXPECT_EQ(32767, i16);
-  EXPECT_TRUE(ParseNumber("-32768", &i16));
+  EXPECT_TRUE(ParseInteger("-32768", &i16));
   EXPECT_EQ(-32768, i16);
-  EXPECT_TRUE(ParseNumber("-0", &i16));
+  EXPECT_TRUE(ParseInteger("-0", &i16));
   EXPECT_EQ(0, i16);
 
   // These are out of range, so they should return an error.
   // The error code depends on whether this is an optional value.
-  EXPECT_FALSE(ParseNumber("32768", &i16));
-  EXPECT_FALSE(ParseNumber("65535", &i16));
+  EXPECT_FALSE(ParseInteger("32768", &i16));
+  EXPECT_FALSE(ParseInteger("65535", &i16));
 
   // Check hex parsing.
-  EXPECT_TRUE(ParseNumber("0x7fff", &i16));
+  EXPECT_TRUE(ParseInteger("0x7fff", &i16));
   EXPECT_EQ(32767, i16);
   // This is out of range.
-  EXPECT_FALSE(ParseNumber("0xffff", &i16));
+  EXPECT_FALSE(ParseInteger("0xffff", &i16));
 }
 
 TEST(ParseNarrowUnsignedIntegers, Sample) {
   uint16_t u16;
 
-  EXPECT_FALSE(ParseNumber(nullptr, &u16));
-  EXPECT_FALSE(ParseNumber("", &u16));
-  EXPECT_FALSE(ParseNumber("0=", &u16));
+  EXPECT_FALSE(ParseInteger(nullptr, &u16));
+  EXPECT_FALSE(ParseInteger("", &u16));
+  EXPECT_FALSE(ParseInteger("0=", &u16));
 
-  EXPECT_TRUE(ParseNumber("0", &u16));
+  EXPECT_TRUE(ParseInteger("0", &u16));
   EXPECT_EQ(0, u16);
-  EXPECT_TRUE(ParseNumber("65535", &u16));
+  EXPECT_TRUE(ParseInteger("65535", &u16));
   EXPECT_EQ(65535, u16);
-  EXPECT_FALSE(ParseNumber("65536", &u16));
+  EXPECT_FALSE(ParseInteger("65536", &u16));
 
   // We don't care about -0 since it's rejected at a higher level.
-  EXPECT_FALSE(ParseNumber("-1", &u16));
-  EXPECT_TRUE(ParseNumber("0xffff", &u16));
+  EXPECT_FALSE(ParseInteger("-1", &u16));
+  EXPECT_TRUE(ParseInteger("0xffff", &u16));
   EXPECT_EQ(0xffff, u16);
-  EXPECT_FALSE(ParseNumber("0x10000", &u16));
+  EXPECT_FALSE(ParseInteger("0x10000", &u16));
 }
 
 TEST(ParseSignedIntegers, Sample) {
   int32_t i32;
 
   // Invalid parse.
-  EXPECT_FALSE(ParseNumber(nullptr, &i32));
-  EXPECT_FALSE(ParseNumber("", &i32));
-  EXPECT_FALSE(ParseNumber("0=", &i32));
+  EXPECT_FALSE(ParseInteger(nullptr, &i32));
+  EXPECT_FALSE(ParseInteger("", &i32));
+  EXPECT_FALSE(ParseInteger("0=", &i32));
 
   // Decimal values.
-  EXPECT_TRUE(ParseNumber("0", &i32));
+  EXPECT_TRUE(ParseInteger("0", &i32));
   EXPECT_EQ(0, i32);
-  EXPECT_TRUE(ParseNumber("2147483647", &i32));
+  EXPECT_TRUE(ParseInteger("2147483647", &i32));
   EXPECT_EQ(std::numeric_limits<int32_t>::max(), i32);
-  EXPECT_FALSE(ParseNumber("2147483648", &i32));
-  EXPECT_TRUE(ParseNumber("-0", &i32));
+  EXPECT_FALSE(ParseInteger("2147483648", &i32));
+  EXPECT_TRUE(ParseInteger("-0", &i32));
   EXPECT_EQ(0, i32);
-  EXPECT_TRUE(ParseNumber("-1", &i32));
+  EXPECT_TRUE(ParseInteger("-1", &i32));
   EXPECT_EQ(-1, i32);
-  EXPECT_TRUE(ParseNumber("-2147483648", &i32));
+  EXPECT_TRUE(ParseInteger("-2147483648", &i32));
   EXPECT_EQ(std::numeric_limits<int32_t>::min(), i32);
 
   // Hex values.
-  EXPECT_TRUE(ParseNumber("0x7fffffff", &i32));
+  EXPECT_TRUE(ParseInteger("0x7fffffff", &i32));
   EXPECT_EQ(std::numeric_limits<int32_t>::max(), i32);
-  EXPECT_FALSE(ParseNumber("0x80000000", &i32));
-  EXPECT_TRUE(ParseNumber("-0x000", &i32));
+  EXPECT_FALSE(ParseInteger("0x80000000", &i32));
+  EXPECT_TRUE(ParseInteger("-0x000", &i32));
   EXPECT_EQ(0, i32);
-  EXPECT_TRUE(ParseNumber("-0x001", &i32));
+  EXPECT_TRUE(ParseInteger("-0x001", &i32));
   EXPECT_EQ(-1, i32);
-  EXPECT_TRUE(ParseNumber("-0x80000000", &i32));
+  EXPECT_TRUE(ParseInteger("-0x80000000", &i32));
   EXPECT_EQ(std::numeric_limits<int32_t>::min(), i32);
 }
 
@@ -113,73 +113,73 @@ TEST(ParseUnsignedIntegers, Sample) {
   uint32_t u32;
 
   // Invalid parse.
-  EXPECT_FALSE(ParseNumber(nullptr, &u32));
-  EXPECT_FALSE(ParseNumber("", &u32));
-  EXPECT_FALSE(ParseNumber("0=", &u32));
+  EXPECT_FALSE(ParseInteger(nullptr, &u32));
+  EXPECT_FALSE(ParseInteger("", &u32));
+  EXPECT_FALSE(ParseInteger("0=", &u32));
 
   // Valid values.
-  EXPECT_TRUE(ParseNumber("0", &u32));
+  EXPECT_TRUE(ParseInteger("0", &u32));
   EXPECT_EQ(0u, u32);
-  EXPECT_TRUE(ParseNumber("4294967295", &u32));
+  EXPECT_TRUE(ParseInteger("4294967295", &u32));
   EXPECT_EQ(std::numeric_limits<uint32_t>::max(), u32);
-  EXPECT_FALSE(ParseNumber("4294967296", &u32));
+  EXPECT_FALSE(ParseInteger("4294967296", &u32));
 
   // Hex values.
-  EXPECT_TRUE(ParseNumber("0xffffffff", &u32));
+  EXPECT_TRUE(ParseInteger("0xffffffff", &u32));
   EXPECT_EQ(std::numeric_limits<uint32_t>::max(), u32);
 
   // We don't care about -0 since it's rejected at a higher level.
-  EXPECT_FALSE(ParseNumber("-1", &u32));
+  EXPECT_FALSE(ParseInteger("-1", &u32));
 }
 
 TEST(ParseWideSignedIntegers, Sample) {
   int64_t i64;
-  EXPECT_FALSE(ParseNumber(nullptr, &i64));
-  EXPECT_FALSE(ParseNumber("", &i64));
-  EXPECT_FALSE(ParseNumber("0=", &i64));
-  EXPECT_TRUE(ParseNumber("0", &i64));
+  EXPECT_FALSE(ParseInteger(nullptr, &i64));
+  EXPECT_FALSE(ParseInteger("", &i64));
+  EXPECT_FALSE(ParseInteger("0=", &i64));
+  EXPECT_TRUE(ParseInteger("0", &i64));
   EXPECT_EQ(0, i64);
-  EXPECT_TRUE(ParseNumber("0x7fffffffffffffff", &i64));
+  EXPECT_TRUE(ParseInteger("0x7fffffffffffffff", &i64));
   EXPECT_EQ(0x7fffffffffffffff, i64);
-  EXPECT_TRUE(ParseNumber("-0", &i64));
+  EXPECT_TRUE(ParseInteger("-0", &i64));
   EXPECT_EQ(0, i64);
-  EXPECT_TRUE(ParseNumber("-1", &i64));
+  EXPECT_TRUE(ParseInteger("-1", &i64));
   EXPECT_EQ(-1, i64);
 }
 
 TEST(ParseWideUnsignedIntegers, Sample) {
   uint64_t u64;
-  EXPECT_FALSE(ParseNumber(nullptr, &u64));
-  EXPECT_FALSE(ParseNumber("", &u64));
-  EXPECT_FALSE(ParseNumber("0=", &u64));
-  EXPECT_TRUE(ParseNumber("0", &u64));
+  EXPECT_FALSE(ParseInteger(nullptr, &u64));
+  EXPECT_FALSE(ParseInteger("", &u64));
+  EXPECT_FALSE(ParseInteger("0=", &u64));
+  EXPECT_TRUE(ParseInteger("0", &u64));
   EXPECT_EQ(0u, u64);
-  EXPECT_TRUE(ParseNumber("0xffffffffffffffff", &u64));
+  EXPECT_TRUE(ParseInteger("0xffffffffffffffff", &u64));
   EXPECT_EQ(0xffffffffffffffffULL, u64);
 
   // We don't care about -0 since it's rejected at a higher level.
-  EXPECT_FALSE(ParseNumber("-1", &u64));
+  EXPECT_FALSE(ParseInteger("-1", &u64));
 }
 
 TEST(ParseFloat, Sample) {
   float f;
 
-  EXPECT_FALSE(ParseNumber(nullptr, &f));
-  EXPECT_FALSE(ParseNumber("", &f));
-  EXPECT_FALSE(ParseNumber("0=", &f));
+  EXPECT_FALSE(ParseNormalFloat(nullptr, &f));
+  EXPECT_FALSE(ParseNormalFloat("", &f));
+  EXPECT_FALSE(ParseNormalFloat("0=", &f));
 
   // These values are exactly representatble.
-  EXPECT_TRUE(ParseNumber("0", &f));
+  EXPECT_TRUE(ParseNormalFloat("0", &f));
   EXPECT_EQ(0.0f, f);
-  EXPECT_TRUE(ParseNumber("42", &f));
+  EXPECT_TRUE(ParseNormalFloat("42", &f));
   EXPECT_EQ(42.0f, f);
-  EXPECT_TRUE(ParseNumber("2.5", &f));
+  EXPECT_TRUE(ParseNormalFloat("2.5", &f));
   EXPECT_EQ(2.5f, f);
-  EXPECT_TRUE(ParseNumber("-32.5", &f));
+  EXPECT_TRUE(ParseNormalFloat("-32.5", &f));
   EXPECT_EQ(-32.5f, f);
-  EXPECT_TRUE(ParseNumber("1e38", &f));
+  EXPECT_TRUE(ParseNormalFloat("1e38", &f));
   EXPECT_EQ(1e38f, f);
-  EXPECT_TRUE(ParseNumber("-1e38", &f));
+  EXPECT_TRUE(ParseNormalFloat("-1e38", &f));
   EXPECT_EQ(-1e38f, f);
 }
 
@@ -191,40 +191,40 @@ TEST(ParseFloat, Overflow) {
   // on floating point.
   HexFloat<FloatProxy<float>> f(0.0f);
 
-  EXPECT_TRUE(ParseNumber("1e38", &f));
+  EXPECT_TRUE(ParseFloat("1e38", &f));
   EXPECT_EQ(1e38f, f.value().getAsFloat());
-  EXPECT_TRUE(ParseNumber("-1e38", &f));
+  EXPECT_TRUE(ParseFloat("-1e38", &f));
   EXPECT_EQ(-1e38f, f.value().getAsFloat());
-  EXPECT_FALSE(ParseNumber("1e40", &f));
-  EXPECT_FALSE(ParseNumber("-1e40", &f));
-  EXPECT_FALSE(ParseNumber("1e400", &f));
-  EXPECT_FALSE(ParseNumber("-1e400", &f));
+  EXPECT_FALSE(ParseFloat("1e40", &f));
+  EXPECT_FALSE(ParseFloat("-1e40", &f));
+  EXPECT_FALSE(ParseFloat("1e400", &f));
+  EXPECT_FALSE(ParseFloat("-1e400", &f));
 }
 
 TEST(ParseDouble, Sample) {
   double f;
 
-  EXPECT_FALSE(ParseNumber(nullptr, &f));
-  EXPECT_FALSE(ParseNumber("", &f));
-  EXPECT_FALSE(ParseNumber("0=", &f));
+  EXPECT_FALSE(ParseNormalFloat(nullptr, &f));
+  EXPECT_FALSE(ParseNormalFloat("", &f));
+  EXPECT_FALSE(ParseNormalFloat("0=", &f));
 
   // These values are exactly representatble.
-  EXPECT_TRUE(ParseNumber("0", &f));
+  EXPECT_TRUE(ParseNormalFloat("0", &f));
   EXPECT_EQ(0.0, f);
-  EXPECT_TRUE(ParseNumber("42", &f));
+  EXPECT_TRUE(ParseNormalFloat("42", &f));
   EXPECT_EQ(42.0, f);
-  EXPECT_TRUE(ParseNumber("2.5", &f));
+  EXPECT_TRUE(ParseNormalFloat("2.5", &f));
   EXPECT_EQ(2.5, f);
-  EXPECT_TRUE(ParseNumber("-32.5", &f));
+  EXPECT_TRUE(ParseNormalFloat("-32.5", &f));
   EXPECT_EQ(-32.5, f);
-  EXPECT_TRUE(ParseNumber("1e38", &f));
+  EXPECT_TRUE(ParseNormalFloat("1e38", &f));
   EXPECT_EQ(1e38, f);
-  EXPECT_TRUE(ParseNumber("-1e38", &f));
+  EXPECT_TRUE(ParseNormalFloat("-1e38", &f));
   EXPECT_EQ(-1e38, f);
   // These are out of range for 32-bit float, but in range for 64-bit float.
-  EXPECT_TRUE(ParseNumber("1e40", &f));
+  EXPECT_TRUE(ParseNormalFloat("1e40", &f));
   EXPECT_EQ(1e40, f);
-  EXPECT_TRUE(ParseNumber("-1e40", &f));
+  EXPECT_TRUE(ParseNormalFloat("-1e40", &f));
   EXPECT_EQ(-1e40, f);
 }
 
@@ -236,16 +236,16 @@ TEST(ParseDouble, Overflow) {
   // on floating point.
   HexFloat<FloatProxy<double>> f(0.0);
 
-  EXPECT_TRUE(ParseNumber("1e38", &f));
+  EXPECT_TRUE(ParseFloat("1e38", &f));
   EXPECT_EQ(1e38, f.value().getAsFloat());
-  EXPECT_TRUE(ParseNumber("-1e38", &f));
+  EXPECT_TRUE(ParseFloat("-1e38", &f));
   EXPECT_EQ(-1e38, f.value().getAsFloat());
-  EXPECT_TRUE(ParseNumber("1e40", &f));
+  EXPECT_TRUE(ParseFloat("1e40", &f));
   EXPECT_EQ(1e40, f.value().getAsFloat());
-  EXPECT_TRUE(ParseNumber("-1e40", &f));
+  EXPECT_TRUE(ParseFloat("-1e40", &f));
   EXPECT_EQ(-1e40, f.value().getAsFloat());
-  EXPECT_FALSE(ParseNumber("1e400", &f));
-  EXPECT_FALSE(ParseNumber("-1e400", &f));
+  EXPECT_FALSE(ParseFloat("1e400", &f));
+  EXPECT_FALSE(ParseFloat("-1e400", &f));
 }
 
 TEST(ParseFloat16, Overflow) {
@@ -256,23 +256,23 @@ TEST(ParseFloat16, Overflow) {
   // on floating point.
   HexFloat<FloatProxy<Float16>> f(0);
 
-  EXPECT_FALSE(ParseNumber(nullptr, &f));
-  EXPECT_TRUE(ParseNumber("-0.0", &f));
+  EXPECT_FALSE(ParseFloat(nullptr, &f));
+  EXPECT_TRUE(ParseFloat("-0.0", &f));
   EXPECT_EQ(uint16_t{0x8000}, f.value().getAsFloat().get_value());
-  EXPECT_TRUE(ParseNumber("1.0", &f));
+  EXPECT_TRUE(ParseFloat("1.0", &f));
   EXPECT_EQ(uint16_t{0x3c00}, f.value().getAsFloat().get_value());
 
   // Overflows 16-bit but not 32-bit
-  EXPECT_FALSE(ParseNumber("1e38", &f));
-  EXPECT_FALSE(ParseNumber("-1e38", &f));
+  EXPECT_FALSE(ParseFloat("1e38", &f));
+  EXPECT_FALSE(ParseFloat("-1e38", &f));
 
   // Overflows 32-bit but not 64-bit
-  EXPECT_FALSE(ParseNumber("1e40", &f));
-  EXPECT_FALSE(ParseNumber("-1e40", &f));
+  EXPECT_FALSE(ParseFloat("1e40", &f));
+  EXPECT_FALSE(ParseFloat("-1e40", &f));
 
   // Overflows 64-bit
-  EXPECT_FALSE(ParseNumber("1e400", &f));
-  EXPECT_FALSE(ParseNumber("-1e400", &f));
+  EXPECT_FALSE(ParseFloat("1e400", &f));
+  EXPECT_FALSE(ParseFloat("-1e400", &f));
 }
 
 void AssertEmitFunc(uint32_t) {
