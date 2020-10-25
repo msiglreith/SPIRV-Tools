@@ -163,7 +163,7 @@ spv_result_t encodeImmediate(spvtools::AssemblyContext* context,
                              const char* text, spv_instruction_t* pInst) {
   assert(*text == '!');
   uint32_t parse_result;
-  if (!spvtools::utils::ParseNumber(text + 1, &parse_result)) {
+  if (!spvtools::utils::ParseInteger(text + 1, &parse_result)) {
     return context->diagnostic(SPV_ERROR_INVALID_TEXT)
            << "Invalid immediate integer: !" << text + 1;
   }

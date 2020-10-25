@@ -157,7 +157,7 @@ const IdType kUnknownType = {0, false, IdTypeClass::kBottom};
 uint32_t AssemblyContext::spvNamedIdAssignOrGet(const char* textValue) {
   if (!ids_to_preserve_.empty()) {
     uint32_t id = 0;
-    if (spvtools::utils::ParseNumber(textValue, &id)) {
+    if (spvtools::utils::ParseInteger(textValue, &id)) {
       if (ids_to_preserve_.find(id) != ids_to_preserve_.end()) {
         bound_ = std::max(bound_, id + 1);
         return id;
@@ -389,7 +389,7 @@ std::set<uint32_t> AssemblyContext::GetNumericIds() const {
   std::set<uint32_t> ids;
   for (const auto& kv : named_ids_) {
     uint32_t id;
-    if (spvtools::utils::ParseNumber(kv.first.c_str(), &id)) ids.insert(id);
+    if (spvtools::utils::ParseInteger(kv.first.c_str(), &id)) ids.insert(id);
   }
   return ids;
 }

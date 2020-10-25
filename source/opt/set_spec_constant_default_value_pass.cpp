@@ -35,7 +35,7 @@ namespace {
 using utils::EncodeNumberStatus;
 using utils::NumberType;
 using utils::ParseAndEncodeNumber;
-using utils::ParseNumber;
+using utils::ParseInteger;
 
 // Given a numeric value in a null-terminated c string and the expected type of
 // the value, parses the string and encodes it in a vector of words. If the
@@ -332,7 +332,7 @@ SetSpecConstantDefaultValuePass::ParseDefaultValuesString(const char* str) {
     const char* entry_end = str;
     std::string spec_id_str(entry_begin, entry_end - entry_begin);
     uint32_t spec_id = 0;
-    if (!ParseNumber(spec_id_str.c_str(), &spec_id)) {
+    if (!ParseInteger(spec_id_str.c_str(), &spec_id)) {
       // The spec id is not a valid uint32 number.
       return nullptr;
     }

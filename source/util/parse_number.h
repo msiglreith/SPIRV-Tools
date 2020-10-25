@@ -160,39 +160,268 @@ bool CheckRangeAndIfHexThenSignExtend(T value, const NumberType& type,
   return true;
 }
 
+#include <cstdlib>
+#include <climits>
+
 // Parses a numeric value of a given type from the given text.  The number
 // should take up the entire string, and should be within bounds for the target
 // type. On success, returns true and populates the object referenced by
 // value_pointer. On failure, returns false.
-template <typename T>
-bool ParseNumber(const char* text, T* value_pointer) {
-  // C++11 doesn't define std::istringstream(int8_t&), so calling this method
-  // with a single-byte type leads to implementation-defined behaviour.
-  // Similarly for uint8_t.
-  static_assert(sizeof(T) > 1,
-                "Single-byte types are not supported in this parse method");
+// template <typename T>
+// bool ParseNumber(const char* text, T* value_pointer) {
+//   // C++11 doesn't define std::istringstream(int8_t&), so calling this method
+//   // with a single-byte type leads to implementation-defined behaviour.
+//   // Similarly for uint8_t.
+//   static_assert(sizeof(T) > 1,
+//                 "Single-byte types are not supported in this parse method");
 
+//   if (!text) return false;
+//   std::istringstream text_stream(text);
+//   // Allow both decimal and hex input for integers.
+//   // It also allows octal input, but we don't care about that case.
+//   text_stream >> std::setbase(0);
+//   text_stream >> *value_pointer;
+
+//   // We should have read something.
+//   bool ok = (text[0] != 0) && !text_stream.bad();
+//   // It should have been all the text.
+//   ok = ok && text_stream.eof();
+//   // It should have been in range.
+//   ok = ok && !text_stream.fail();
+
+//   // Work around a bug in the GNU C++11 library. It will happily parse
+//   // "-1" for uint16_t as 65535.
+//   if (ok && text[0] == '-')
+//     ok = !ClampToZeroIfUnsignedType<T>::Clamp(value_pointer);
+
+//   return ok;
+// }
+
+template <typename T, typename Traits>
+inline bool ParseFloat(const char* text, HexFloat<T, Traits>* value);
+
+inline bool ParseNormalFloat(const char* text, float* value_pointer) {
   if (!text) return false;
-  std::istringstream text_stream(text);
-  // Allow both decimal and hex input for integers.
-  // It also allows octal input, but we don't care about that case.
-  text_stream >> std::setbase(0);
-  text_stream >> *value_pointer;
 
-  // We should have read something.
-  bool ok = (text[0] != 0) && !text_stream.bad();
-  // It should have been all the text.
-  ok = ok && text_stream.eof();
-  // It should have been in range.
-  ok = ok && !text_stream.fail();
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtof(text, &end);
 
-  // Work around a bug in the GNU C++11 library. It will happily parse
-  // "-1" for uint16_t as 65535.
-  if (ok && text[0] == '-')
-    ok = !ClampToZeroIfUnsignedType<T>::Clamp(value_pointer);
+  if ((errno == ERANGE && (parsed == HUGE_VALF || parsed == -HUGE_VALF)) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
 
-  return ok;
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  *value_pointer = parsed;
+  return true;
 }
+
+inline bool ParseNormalFloat(const char* text, double* value_pointer) {
+  if (!text) return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtod(text, &end);
+
+  if ((errno == ERANGE && (parsed == HUGE_VAL || parsed == -HUGE_VAL)) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  *value_pointer = parsed;
+  return true;
+}
+
+template <>
+inline bool ParseFloat<FloatProxy<Float16>, HexFloatTraits<FloatProxy<Float16>>>(
+  const char* text,
+  HexFloat<FloatProxy<Float16>, HexFloatTraits<FloatProxy<Float16>>>* value_pointer) {
+  float parsed;
+  if (!ParseNormalFloat(text, &parsed)) {
+    return false;
+  }
+
+  HexFloat<FloatProxy<float>> float_val(parsed);
+  float_val.castTo(*value_pointer, round_direction::kToZero);
+
+  if (Float16::isInfinity(value_pointer->value().getAsFloat())) {
+    value_pointer->set_value(value_pointer->isNegative() ? Float16::lowest() : Float16::max());
+    return false;
+  }
+
+  return true;
+}
+
+template<>
+inline bool ParseFloat<FloatProxy<float>, HexFloatTraits<FloatProxy<float>>>(
+  const char* text,
+  HexFloat<FloatProxy<float>, HexFloatTraits<FloatProxy<float>>>* value_pointer) {
+  float parsed;
+  if (!ParseNormalFloat(text, &parsed)) {
+    return false;
+  }
+
+  value_pointer->set_value(parsed);
+  return true;
+}
+
+template<>
+inline bool ParseFloat<FloatProxy<double>, HexFloatTraits<FloatProxy<double>>>(
+  const char* text,
+  HexFloat<FloatProxy<double>, HexFloatTraits<FloatProxy<double>>>* value_pointer) {
+  double parsed;
+  if (!ParseNormalFloat(text, &parsed)) {
+    return false;
+  }
+
+  value_pointer->set_value(parsed);
+  return true;
+}
+
+inline bool ParseInteger(const char* text, uint16_t* value_pointer) {
+  if (!text || text[0] == '-') return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtoul(text, &end, 0);
+
+  if ((errno == ERANGE && parsed == ULONG_MAX) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  if (parsed > std::numeric_limits<uint16_t>::max() || parsed < std::numeric_limits<uint16_t>::min()) {
+    return false;
+  }
+
+  *value_pointer = static_cast<uint16_t>(parsed);
+  return true;
+}
+
+inline bool ParseInteger(const char* text, int16_t* value_pointer) {
+  if (!text) return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtol(text, &end, 0);
+
+  if ((errno == ERANGE && (parsed == LONG_MAX || parsed == LONG_MIN)) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  if (parsed > std::numeric_limits<int16_t>::max() || parsed < std::numeric_limits<int16_t>::min()) {
+    return false;
+  }
+
+  *value_pointer = static_cast<int16_t>(parsed);
+  return true;
+}
+
+inline bool ParseInteger(const char* text, uint32_t* value_pointer) {
+  if (!text || text[0] == '-') return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtoul(text, &end, 0);
+
+  if ((errno == ERANGE && parsed == ULONG_MAX) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  if (parsed > std::numeric_limits<uint32_t>::max() || parsed < std::numeric_limits<uint32_t>::min()) {
+    return false;
+  }
+
+  *value_pointer = static_cast<uint32_t>(parsed);
+  return true;
+}
+
+inline bool ParseInteger(const char* text, int32_t* value_pointer) {
+  if (!text) return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtol(text, &end, 0);
+
+  if ((errno == ERANGE && (parsed == LONG_MAX || parsed == LONG_MIN)) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  if (parsed > std::numeric_limits<int32_t>::max() || parsed < std::numeric_limits<int32_t>::min()) {
+    return false;
+  }
+
+  *value_pointer = static_cast<int32_t>(parsed);
+  return true;
+}
+
+inline bool ParseInteger(const char* text, int64_t* value_pointer) {
+  if (!text) return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtoll(text, &end, 0);
+
+  if ((errno == ERANGE && (parsed == LLONG_MAX || parsed == LLONG_MIN)) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  if (parsed > std::numeric_limits<int64_t>::max() || parsed < std::numeric_limits<int64_t>::min()) {
+    return false;
+  }
+
+  *value_pointer = static_cast<int64_t>(parsed);
+  return true;
+}
+
+inline bool ParseInteger(const char* text, uint64_t* value_pointer) {
+  if (!text || text[0] == '-') return false;
+
+  char* end = nullptr;
+  errno = 0;
+  auto parsed = std::strtoull(text, &end, 0);
+
+  if ((errno == ERANGE && parsed == ULLONG_MAX) || (errno != 0 && parsed == 0)) {
+    return false;
+  }
+
+  if (end == text || end[0] != 0) {
+    return false;
+  }
+
+  if (parsed > std::numeric_limits<uint64_t>::max() || parsed < std::numeric_limits<uint64_t>::min()) {
+    return false;
+  }
+
+  *value_pointer = static_cast<uint64_t>(parsed);
+  return true;
+}
+
 
 // Enum to indicate the parsing and encoding status.
 enum class EncodeNumberStatus {

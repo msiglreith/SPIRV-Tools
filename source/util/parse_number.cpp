@@ -91,7 +91,7 @@ EncodeNumberStatus ParseAndEncodeIntegerNumber(
   if (is_negative) {
     int64_t decoded_signed = 0;
 
-    if (!ParseNumber(text, &decoded_signed)) {
+    if (!ParseInteger(text, &decoded_signed)) {
       ErrorMsgStream(error_msg) << "Invalid signed integer literal: " << text;
       return EncodeNumberStatus::kInvalidText;
     }
@@ -107,7 +107,7 @@ EncodeNumberStatus ParseAndEncodeIntegerNumber(
     decoded_bits = decoded_signed;
   } else {
     // There's no leading minus sign, so parse it as an unsigned integer.
-    if (!ParseNumber(text, &decoded_bits)) {
+    if (!ParseInteger(text, &decoded_bits)) {
       ErrorMsgStream(error_msg) << "Invalid unsigned integer literal: " << text;
       return EncodeNumberStatus::kInvalidText;
     }
@@ -148,7 +148,7 @@ EncodeNumberStatus ParseAndEncodeFloatingPointNumber(
   switch (bit_width) {
     case 16: {
       HexFloat<FloatProxy<Float16>> hVal(0);
-      if (!ParseNumber(text, &hVal)) {
+      if (!ParseFloat(text, &hVal)) {
         ErrorMsgStream(error_msg) << "Invalid 16-bit float literal: " << text;
         return EncodeNumberStatus::kInvalidText;
       }
@@ -161,7 +161,7 @@ EncodeNumberStatus ParseAndEncodeFloatingPointNumber(
     } break;
     case 32: {
       HexFloat<FloatProxy<float>> fVal(0.0f);
-      if (!ParseNumber(text, &fVal)) {
+      if (!ParseFloat(text, &fVal)) {
         ErrorMsgStream(error_msg) << "Invalid 32-bit float literal: " << text;
         return EncodeNumberStatus::kInvalidText;
       }
@@ -170,7 +170,7 @@ EncodeNumberStatus ParseAndEncodeFloatingPointNumber(
     } break;
     case 64: {
       HexFloat<FloatProxy<double>> dVal(0.0);
-      if (!ParseNumber(text, &dVal)) {
+      if (!ParseFloat(text, &dVal)) {
         ErrorMsgStream(error_msg) << "Invalid 64-bit float literal: " << text;
         return EncodeNumberStatus::kInvalidText;
       }
