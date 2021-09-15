@@ -45,6 +45,8 @@ ModuleLayoutSection InstructionLayoutSection(
       return kLayoutExtInstImport;
     case SpvOpMemoryModel:
       return kLayoutMemoryModel;
+    case SpvOpSamplerImageAddressingModeNV:
+      return kLayoutSamplerImageAddressingNV;
     case SpvOpEntryPoint:
       return kLayoutEntryPoint;
     case SpvOpExecutionMode:

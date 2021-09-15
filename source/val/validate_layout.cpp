@@ -334,6 +334,7 @@ spv_result_t ModuleLayoutPass(ValidationState_t& _, const Instruction* inst) {
     case kLayoutExtensions:
     case kLayoutExtInstImport:
     case kLayoutMemoryModel:
+    case kLayoutSamplerImageAddressingNV:
     case kLayoutEntryPoint:
     case kLayoutExecutionMode:
     case kLayoutDebug1:

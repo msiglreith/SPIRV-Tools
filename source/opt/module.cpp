@@ -90,6 +90,7 @@ void Module::ForEachInst(const std::function<void(Instruction*)>& f,
   DELEGATE(extensions_);
   DELEGATE(ext_inst_imports_);
   if (memory_model_) memory_model_->ForEachInst(f, run_on_debug_line_insts);
+  if (sampler_addressing_mode_) sampler_addressing_mode_->ForEachInst(f, run_on_debug_line_insts);
   DELEGATE(entry_points_);
   DELEGATE(execution_modes_);
   DELEGATE(debugs1_);
@@ -114,6 +115,7 @@ void Module::ForEachInst(const std::function<void(const Instruction*)>& f,
   if (memory_model_)
     static_cast<const Instruction*>(memory_model_.get())
         ->ForEachInst(f, run_on_debug_line_insts);
+  if (sampler_addressing_mode_) static_cast<const Instruction*>(sampler_addressing_mode_.get())->ForEachInst(f, run_on_debug_line_insts);
   for (auto& i : entry_points_) DELEGATE(i);
   for (auto& i : execution_modes_) DELEGATE(i);
   for (auto& i : debugs1_) DELEGATE(i);

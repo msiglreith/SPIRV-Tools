@@ -210,6 +210,7 @@ class IRContext {
   inline void AddExtInstImport(std::unique_ptr<Instruction>&& e);
   // Set the memory model for this module.
   inline void SetMemoryModel(std::unique_ptr<Instruction>&& m);
+  inline void SetSamplerAddressingMode(std::unique_ptr<Instruction>&& m);
   // Appends an entry point instruction to this module.
   inline void AddEntryPoint(std::unique_ptr<Instruction>&& e);
   // Appends an execution mode instruction to this module.
@@ -1054,6 +1055,10 @@ void IRContext::AddExtInstImport(std::unique_ptr<Instruction>&& e) {
 
 void IRContext::SetMemoryModel(std::unique_ptr<Instruction>&& m) {
   module()->SetMemoryModel(std::move(m));
+}
+
+void IRContext::SetSamplerAddressingMode(std::unique_ptr<Instruction>&& m) {
+  module()->SetSamplerAddressingMode(std::move(m));
 }
 
 void IRContext::AddEntryPoint(std::unique_ptr<Instruction>&& e) {

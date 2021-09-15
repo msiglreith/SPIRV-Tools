@@ -48,6 +48,7 @@ enum ModuleLayoutSection {
   kLayoutExtensions,            /// < Section 2.4 #2
   kLayoutExtInstImport,         /// < Section 2.4 #3
   kLayoutMemoryModel,           /// < Section 2.4 #4
+  kLayoutSamplerImageAddressingNV,
   kLayoutEntryPoint,            /// < Section 2.4 #5
   kLayoutExecutionMode,         /// < Section 2.4 #6
   kLayoutDebug1,                /// < Section 2.4 #7 > 1

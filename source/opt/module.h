@@ -83,6 +83,8 @@ class Module {
   // Set the memory model for this module.
   inline void SetMemoryModel(std::unique_ptr<Instruction> m);
 
+  inline void SetSamplerAddressingMode(std::unique_ptr<Instruction>&& m);
+
   // Appends an entry point instruction to this module.
   inline void AddEntryPoint(std::unique_ptr<Instruction> e);
 
@@ -286,6 +288,7 @@ class Module {
   InstructionList ext_inst_imports_;
   // A module only has one memory model instruction.
   std::unique_ptr<Instruction> memory_model_;
+  std::unique_ptr<Instruction> sampler_addressing_mode_;
   InstructionList entry_points_;
   InstructionList execution_modes_;
   InstructionList debugs1_;
@@ -322,6 +325,10 @@ inline void Module::AddExtInstImport(std::unique_ptr<Instruction> e) {
 
 inline void Module::SetMemoryModel(std::unique_ptr<Instruction> m) {
   memory_model_ = std::move(m);
+}
+
+inline void Module::SetSamplerAddressingMode(std::unique_ptr<Instruction>&& m) {
+  sampler_addressing_mode_ = std::move(m);
 }
 
 inline void Module::AddEntryPoint(std::unique_ptr<Instruction> e) {
